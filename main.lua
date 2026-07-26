@@ -9,7 +9,7 @@ if success and moduleSource then
         local AdminUI = loader()
         if AdminUI and typeof(AdminUI) == "table" and AdminUI.CreateMenu then
             AdminUI.CreateMenu()
-            print("[SpiderHub]: Engine fully loaded. Press Left/Right Alt to toggle display interface.")
+            print("[SpiderHub]: Engine fully loaded. Press Left/Right Alt or tap the icon to toggle display interface.")
         else
             warn("[SpiderHub Verification Error]: Loaded module did not return a valid interface builder.")
         end
