@@ -1,5 +1,5 @@
 -- =============================================================================
--- SPIDERHUB ADVANCED ADMIN SYSTEM (UNIFIED ENGINE)
+-- SPIDERHUB ADVANCED ADMIN SYSTEM (FIXED SELECTION WORKFLOW)
 -- =============================================================================
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
@@ -12,6 +12,7 @@ local SoundService = game:GetService("SoundService")
 
 local Player = Players.LocalPlayer
 local PlayerGui = Player:WaitForChild("PlayerGui")
+local Mouse = Player:GetMouse()
 
 -- Safety cleanup of duplicate frames
 if PlayerGui:FindFirstChild("SpiderHubUI") then
@@ -119,7 +120,7 @@ local function CreateButton(text, parent, callback)
     Btn.TextColor3 = Color3.fromRGB(255, 255, 255)
     Btn.Text = text
     Btn.Font = Enum.Font.SourceSans
-    Btn.TextSize = 16
+    Btn.TextSize = 14
     Btn.Parent = parent
     
     local BtnCorner = Instance.new("UICorner")
@@ -135,7 +136,7 @@ local function CreateButton(text, parent, callback)
 end
 
 -- =============================================================================
--- WORKSPACE FILE VIEWER INSTANCE PANEL (ROBLOX STUDIO LAYOUT REPLICA)
+-- ROBLOX STUDIO FILE EXPLORER PANEL
 -- =============================================================================
 local ExplorerScroll = Instance.new("ScrollingFrame")
 ExplorerScroll.Size = UDim2.new(1, 0, 1, 0)
@@ -149,7 +150,6 @@ ExplorerLayout.SortOrder = Enum.SortOrder.LayoutOrder
 ExplorerLayout.Padding = UDim.new(0, 2)
 ExplorerLayout.Parent = ExplorerScroll
 
--- Read service objects programmatically to establish structural rendering template
 local targetsToDisplay = {Workspace, ReplicatedStorage, Lighting, SoundService}
 for _, service in ipairs(targetsToDisplay) do
     local ServiceLabel = Instance.new("TextLabel")
@@ -176,7 +176,7 @@ for _, service in ipairs(targetsToDisplay) do
 end
 
 -- =============================================================================
--- ADMINISTRATIVE DIALOG MANAGEMENT ENGINE
+-- FIXED SELECTION & DIALOG SEQUENCE ENGINE
 -- =============================================================================
 local NotificationBox = Instance.new("TextLabel")
 NotificationBox.Size = UDim2.new(1, 0, 0, 40)
@@ -184,74 +184,77 @@ NotificationBox.BackgroundTransparency = 1
 NotificationBox.TextColor3 = Color3.fromRGB(0, 255, 0)
 NotificationBox.Text = "Status: Awaiting Framework Command..."
 NotificationBox.Font = Enum.Font.SourceSansBold
-NotificationBox.TextSize = 14
+NotificationBox.TextSize = 12
 NotificationBox.TextWrapped = true
 NotificationBox.Parent = ItemPage
 
+local choosingObject = false
+
 CreateButton("Initiate Administrative Dupe Sequence", ItemPage, function()
-    -- Stage 1 Verification Response Signal
+    if choosingObject then return end
+    
+    -- Step 1: Initial activation message
     NotificationBox.Text = "SPIDER HUB ADMIN DUPE WORKING YOU MAY NOW CONTINUE"
-    task.wait(1.5)
-    
-    -- Stage 2 Verification UI Assembly Generation
-    local DialogFrame = Instance.new("Frame")
-    DialogFrame.Name = "PromptFrame"
-    DialogFrame.Size = UDim2.new(0, 320, 0, 150)
-    DialogFrame.Position = UDim2.new(0.5, -160, 0.5, -75)
-    DialogFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 28)
-    DialogFrame.BorderSizePixel = 2
-    DialogFrame.BorderColor3 = Color3.fromRGB(255, 215, 0)
-    DialogFrame.ZIndex = 10
-    DialogFrame.Parent = ScreenGui
-    
-    local DialogCorner = Instance.new("UICorner")
-    DialogCorner.CornerRadius = UDim.new(0, 6)
-    DialogCorner.Parent = DialogFrame
-    
-    local MsgLabel = Instance.new("TextLabel")
-    MsgLabel.Size = UDim2.new(1, -20, 0, 60)
-    MsgLabel.Position = UDim2.new(0, 10, 0, 10)
-    MsgLabel.BackgroundTransparency = 1
-    MsgLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    MsgLabel.Text = "SPIDER HUB ADMIN DUPE WORKING DO YOU WANT TO CONTINUE?"
-    MsgLabel.Font = Enum.Font.SourceSansBold
-    MsgLabel.TextSize = 14
-    MsgLabel.TextWrapped = true
-    MsgLabel.ZIndex = 10
-    MsgLabel.Parent = DialogFrame
-    
-    local YesBtn = Instance.new("TextButton")
-    YesBtn.Size = UDim2.new(0, 100, 0, 35)
-    YesBtn.Position = UDim2.new(0, 40, 0, 85)
-    YesBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 0)
-    YesBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    YesBtn.Text = "YES"
-    YesBtn.Font = Enum.Font.SourceSansBold
-    YesBtn.TextSize = 16
-    YesBtn.ZIndex = 10
-    YesBtn.Parent = DialogFrame
-    
-    local YesCorner = Instance.new("UICorner")
-    YesCorner.CornerRadius = UDim.new(0, 4)
-    YesCorner.Parent = YesBtn
-    
-    local NoBtn = YesBtn:Clone()
-    NoBtn.Position = UDim2.new(0, 180, 0, 85)
-    NoBtn.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
-    NoBtn.Text = "NO"
-    NoBtn.Parent = DialogFrame
-    
-    -- YES Flow: Simulates placing the asset copy safely within base architecture parameters
-    YesBtn.MouseButton1Click:Connect(function()
-        DialogFrame:Destroy()
-        NotificationBox.Text = "[System Info]: Select a targeted destination spot inside your assigned grid."
+    choosingObject = true
+    task.wait(0.5)
+    NotificationBox.Text = "👉 TAP OR CLICK ON THE CHARACTER / OBJECT YOU WANT TO DUPE..."
+
+    -- Wait until user clicks an object in the world
+    local clickConnection
+    clickConnection = Mouse.Button1Down:Connect(function()
+        local target = Mouse.Target
+        if not target then return end
         
-        -- Safe authorization blueprint model replication logic
-        local character = Player.Character
-        local targetItem = Workspace:FindFirstChild("BrainrotItem")
-        if character and targetItem then
-            local clonedItem = targetItem:Clone()
-            if clonedItem:IsA("Model") then
-                clonedItem:PivotTo(character:GetPivot() * CFrame.new(5, -2.5, 5))
-            elseif clonedItem:IsA("BasePart") then
-                clonedItem.CFrame = character:GetPivot() * CFrame.new(5, -2.5, 5)
+        -- Disconnect listener immediately so multiple clicks don't break it
+        clickConnection:Disconnect()
+        choosingObject = false
+        
+        -- Identify the model group or character group clicked
+        local targetedModel = target:FindFirstAncestorOfClass("Model") or target
+        NotificationBox.Text = "Selected target object: " .. targetedModel.Name
+        task.wait(1)
+        
+        -- Step 2: Show the confirmation prompt window
+        local DialogFrame = Instance.new("Frame")
+        DialogFrame.Name = "PromptFrame"
+        DialogFrame.Size = UDim2.new(0, 320, 0, 150)
+        DialogFrame.Position = UDim2.new(0.5, -160, 0.5, -75)
+        DialogFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 28)
+        DialogFrame.BorderSizePixel = 2
+        DialogFrame.BorderColor3 = Color3.fromRGB(255, 215, 0)
+        DialogFrame.ZIndex = 10
+        DialogFrame.Parent = ScreenGui
+        
+        local DialogCorner = Instance.new("UICorner")
+        DialogCorner.CornerRadius = UDim.new(0, 6)
+        DialogCorner.Parent = DialogFrame
+        
+        local MsgLabel = Instance.new("TextLabel")
+        MsgLabel.Size = UDim2.new(1, -20, 0, 60)
+        MsgLabel.Position = UDim2.new(0, 10, 0, 10)
+        MsgLabel.BackgroundTransparency = 1
+        MsgLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+        MsgLabel.Text = "SPIDER HUB ADMIN DUPE WORKING DO YOU WANT TO CONTINUE?"
+        MsgLabel.Font = Enum.Font.SourceSansBold
+        MsgLabel.TextSize = 14
+        MsgLabel.TextWrapped = true
+        MsgLabel.ZIndex = 10
+        MsgLabel.Parent = DialogFrame
+        
+        local YesBtn = Instance.new("TextButton")
+        YesBtn.Size = UDim2.new(0, 100, 0, 35)
+        YesBtn.Position = UDim2.new(0, 40, 0, 85)
+        YesBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 0)
+        YesBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        YesBtn.Text = "YES"
+        YesBtn.Font = Enum.Font.SourceSansBold
+        YesBtn.TextSize = 16
+        YesBtn.ZIndex = 10
+        YesBtn.Parent = DialogFrame
+        
+        local YesCorner = Instance.new("UICorner")
+        YesCorner.CornerRadius = UDim.new(0, 4)
+        YesCorner.Parent = YesBtn
+        
+        local NoBtn = YesBtn:Clone()
+        NoBtn.Position = UDim2.new(0, 180, 0, 85)
