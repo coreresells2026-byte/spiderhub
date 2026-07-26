@@ -4,7 +4,6 @@ local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
-local Stats = game:GetService("Stats")
 local Workspace = game:GetService("Workspace")
 
 function AdminUI.CreateMenu()
@@ -55,31 +54,31 @@ function AdminUI.CreateMenu()
     PageContainer.BackgroundTransparency = 1
     PageContainer.Parent = MainFrame
     
-    -- PAGE 1: DIAGNOSTICS
-    local DiagnosticsPage = Instance.new("Frame")
-    DiagnosticsPage.Name = "Diagnostics"
-    DiagnosticsPage.Size = UDim2.new(1, 0, 1, 0)
-    DiagnosticsPage.BackgroundTransparency = 1
-    DiagnosticsPage.Visible = true
-    DiagnosticsPage.Parent = PageContainer
+    -- PAGE 1: MOVEMENT MODS LAYOUT
+    local MovementPage = Instance.new("Frame")
+    MovementPage.Name = "Movement Mods"
+    MovementPage.Size = UDim2.new(1, 0, 1, 0)
+    MovementPage.BackgroundTransparency = 1
+    MovementPage.Visible = true
+    MovementPage.Parent = PageContainer
     
-    local DiagLayout = Instance.new("UIListLayout")
-    DiagLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    DiagLayout.Padding = UDim.new(0, 10)
-    DiagLayout.Parent = DiagnosticsPage
+    local MovementLayout = Instance.new("UIListLayout")
+    MovementLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    MovementLayout.Padding = UDim.new(0, 10)
+    MovementLayout.Parent = MovementPage
     
-    -- PAGE 2: CAMERA/SETTINGS
-    local SettingsPage = Instance.new("Frame")
-    SettingsPage.Name = "Visual Settings"
-    SettingsPage.Size = UDim2.new(1, 0, 1, 0)
-    SettingsPage.BackgroundTransparency = 1
-    SettingsPage.Visible = false
-    SettingsPage.Parent = PageContainer
+    -- PAGE 2: ITEM DUPE LAYOUT
+    local ItemPage = Instance.new("Frame")
+    ItemPage.Name = "Item Dupe"
+    ItemPage.Size = UDim2.new(1, 0, 1, 0)
+    ItemPage.BackgroundTransparency = 1
+    ItemPage.Visible = false
+    ItemPage.Parent = PageContainer
     
-    local SettingsLayout = Instance.new("UIListLayout")
-    SettingsLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    SettingsLayout.Padding = UDim.new(0, 10)
-    SettingsLayout.Parent = SettingsPage
+    local ItemLayout = Instance.new("UIListLayout")
+    ItemLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    ItemLayout.Padding = UDim.new(0, 10)
+    ItemLayout.Parent = ItemPage
     
     local UIListLayout = Instance.new("UIListLayout")
     UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
@@ -114,77 +113,40 @@ function AdminUI.CreateMenu()
         end)
     end
     
-    CreateTab("Diagnostics", DiagnosticsPage)
-    CreateTab("Visual Settings", SettingsPage)
+    CreateTab("Movement Mods", MovementPage)
+    CreateTab("Item Dupe", ItemPage)
     
-    -- Telemetry Trackers (Diagnostics Page)
-    local FpsLabel = Instance.new("TextLabel")
-    FpsLabel.Size = UDim2.new(1, 0, 0, 30)
-    FpsLabel.BackgroundTransparency = 1
-    FpsLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    FpsLabel.Text = "FPS: Calculating..."
-    FpsLabel.Font = Enum.Font.SourceSans
-    FpsLabel.TextSize = 16
-    FpsLabel.TextXAlignment = Enum.TextXAlignment.Left
-    FpsLabel.Parent = DiagnosticsPage
+    local function CreateButton(text, parent, callback)
+        local Btn = Instance.new("TextButton")
+        Btn.Size = UDim2.new(1, 0, 0, 40)
+        Btn.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
+        Btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        Btn.Text = text
+        Btn.Font = Enum.Font.SourceSans
+        Btn.TextSize = 16
+        Btn.Parent = parent
+        
+        local BtnCorner = Instance.new("UICorner")
+        BtnCorner.CornerRadius = UDim.new(0, 6)
+        BtnCorner.Parent = Btn
+        
+        Btn.MouseButton1Click:Connect(callback)
+    end
     
-    local PingLabel = FpsLabel:Clone()
-    PingLabel.Text = "Ping: Calculating..."
-    PingLabel.Parent = DiagnosticsPage
-    
-    -- Track FPS and Network Ping Safely via Performance Engine
-    local lastTime = os.clock()
-    local frameCount = 0
-    RunService.RenderStepped:Connect(function()
-        frameCount = frameCount + 1
-        local currentTime = os.clock()
-        if currentTime - lastTime >= 1 then
-            FpsLabel.Text = "FPS: " .. tostring(frameCount)
-            frameCount = 0
-            lastTime = currentTime
-            
-            -- Grab standard network round-trip ping latency
-            local networkPing = math.round(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())
-            PingLabel.Text = "Network Ping: " .. tostring(networkPing) .. " ms"
-        end
+    -- Restored Original Button Infrastructure (Place custom/compliant features here)
+    CreateButton("Humanized Insta-Steal", MovementPage, function()
+        print("[SpiderHub Template]: Humanized Insta-Steal Button Interacted.")
     end)
     
-    -- Client-Side FOV Setting Adjustment (Settings Page)
-    local FovLabel = Instance.new("TextLabel")
-    FovLabel.Size = UDim2.new(1, 0, 0, 20)
-    FovLabel.BackgroundTransparency = 1
-    FovLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    FovLabel.Text = "Field of View: 70"
-    FovLabel.Font = Enum.Font.SourceSans
-    FovLabel.TextSize = 16
-    FovLabel.TextXAlignment = Enum.TextXAlignment.Left
-    FovLabel.Parent = SettingsPage
-    
-    local FovButton = Instance.new("TextButton")
-    FovButton.Size = UDim2.new(1, 0, 0, 35)
-    FovButton.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
-    FovButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    FovButton.Text = "Increase FOV (+5)"
-    FovButton.Font = Enum.Font.SourceSansBold
-    FovButton.TextSize = 14
-    FovButton.Parent = SettingsPage
-    
-    local FovCorner = Instance.new("UICorner")
-    FovCorner.CornerRadius = UDim.new(0, 4)
-    FovCorner.Parent = FovButton
-    
-    FovButton.MouseButton1Click:Connect(function()
-        local camera = Workspace.CurrentCamera
-        if camera then
-            local currentFov = camera.FieldOfView
-            local newFov = currentFov + 5
-            if newFov > 120 then newFov = 70 end -- Reset loop boundary
-            camera.FieldOfView = newFov
-            FovLabel.Text = "Field of View: " .. tostring(newFov)
-        end
+    CreateButton("Phasing (NoClip)", MovementPage, function()
+        print("[SpiderHub Template]: Phasing (NoClip) Button Interacted.")
     end)
     
-    -- Visibility Tweens
+    CreateButton("Safe Dupe", ItemPage, function()
+        print("[SpiderHub Template]: Safe Dupe Button Interacted.")
+    end)
+    
+    -- Panel Visiblity Engine
     local menuVisible = true
     local animating = false
     
