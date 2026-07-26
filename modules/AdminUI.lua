@@ -5,10 +5,15 @@ local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 local Workspace = game:GetService("Workspace")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 function AdminUI.CreateMenu()
     local Player = Players.LocalPlayer
     local PlayerGui = Player:WaitForChild("PlayerGui")
+    
+    -- Locate the server communication layer
+    local RemoteFolder = ReplicatedStorage:WaitForChild("SpiderHubRemotes")
+    local ActionRemote = RemoteFolder:WaitForChild("RequestGameAction")
     
     if PlayerGui:FindFirstChild("SpiderHubUI") then
         PlayerGui.SpiderHubUI:Destroy()
@@ -54,7 +59,6 @@ function AdminUI.CreateMenu()
     PageContainer.BackgroundTransparency = 1
     PageContainer.Parent = MainFrame
     
-    -- PAGE 1: MOVEMENT MODS LAYOUT
     local MovementPage = Instance.new("Frame")
     MovementPage.Name = "Movement Mods"
     MovementPage.Size = UDim2.new(1, 0, 1, 0)
@@ -67,7 +71,6 @@ function AdminUI.CreateMenu()
     MovementLayout.Padding = UDim.new(0, 10)
     MovementLayout.Parent = MovementPage
     
-    -- PAGE 2: ITEM DUPE LAYOUT
     local ItemPage = Instance.new("Frame")
     ItemPage.Name = "Item Dupe"
     ItemPage.Size = UDim2.new(1, 0, 1, 0)
@@ -133,20 +136,62 @@ function AdminUI.CreateMenu()
         Btn.MouseButton1Click:Connect(callback)
     end
     
-    -- Restored Original Button Infrastructure (Place custom/compliant features here)
+    -- CONNECTING COMPLIANT ACTIONS TO THE SERVER REMOTES
+    local isStealing = false
     CreateButton("Humanized Insta-Steal", MovementPage, function()
-        print("[SpiderHub Template]: Humanized Insta-Steal Button Interacted.")
+        if isStealing then return end
+        local character = Player.Character
+        local rootPart = character and character:FindFirstChild("HumanoidRootPart")
+        local targetZone = Workspace:FindFirstChild("Bases") 
+            and Workspace.Bases:FindFirstChild("RedBase") 
+            and Workspace.Bases.RedBase:FindFirstChild("DepositZone")
+            
+        if rootPart and targetZone then
+            isStealing = true
+            local startPos = rootPart.Position
+            local targetPos = targetZone.Position
+            local distance = (targetPos - startPos).Magnitude
+            local duration = distance / 15.5
+            
+            -- Smooth visual transition locally first
+            local tween = TweenService:Create(rootPart, TweenInfo.new(duration, Enum.EasingStyle.Linear), {CFrame = targetZone.CFrame})
+            tween:Play()
+            tween.Completed:Connect(function()
+                -- Confirm and finalize location directly on the server to prevent rubberbands
+                ActionRemote:FireServer("InstaSteal", targetZone.CFrame)
+                isStealing = false
+            end)
+        end
     end)
     
+    local noclipActive = false
     CreateButton("Phasing (NoClip)", MovementPage, function()
-        print("[SpiderHub Template]: Phasing (NoClip) Button Interacted.")
+        noclipActive = not noclipActive
+        if noclipActive then
+            -- Tell server to drop collisions globally
+            ActionRemote:FireServer("NoclipOn")
+            
+            -- Local loop to keep client fluid
+            RunService.PreSimulation:Connect(function()
+                local char = Player.Character
+                if char and noclipActive then
+                    for _, p in ipairs(char:GetDescendants()) do
+                        if p:IsA("BasePart") then p.CanCollide = false end
+                    end
+                end
+            end)
+        else
+            -- Tell server to restore original collisions
+            ActionRemote:FireServer("NoclipOff")
+        end
     end)
     
     CreateButton("Safe Dupe", ItemPage, function()
-        print("[SpiderHub Template]: Safe Dupe Button Interacted.")
+        -- Direct request to server to replicate a secure item clone
+        ActionRemote:FireServer("SafeDupe")
     end)
     
-    -- Panel Visiblity Engine
+    -- Open/Close Animations
     local menuVisible = true
     local animating = false
     
