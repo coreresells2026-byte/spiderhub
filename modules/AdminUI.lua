@@ -10,19 +10,16 @@ function AdminUI.CreateMenu()
     local Player = Players.LocalPlayer
     local PlayerGui = Player:WaitForChild("PlayerGui")
     
-    -- Protect against duplicate UI instances
     if PlayerGui:FindFirstChild("SpiderHubUI") then
         PlayerGui.SpiderHubUI:Destroy()
     end
     
-    -- Main ScreenGui
     local ScreenGui = Instance.new("ScreenGui")
     ScreenGui.Name = "SpiderHubUI"
     ScreenGui.ResetOnSpawn = false
     ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     ScreenGui.Parent = PlayerGui
     
-    -- Main Frame
     local MainFrame = Instance.new("Frame")
     MainFrame.Name = "MainFrame"
     MainFrame.Size = UDim2.new(0, 450, 0, 300)
@@ -39,7 +36,6 @@ function AdminUI.CreateMenu()
     UICorner.CornerRadius = UDim.new(0, 8)
     UICorner.Parent = MainFrame
     
-    -- Sidebar Navigation
     local Sidebar = Instance.new("Frame")
     Sidebar.Name = "Sidebar"
     Sidebar.Size = UDim2.new(0, 130, 1, 0)
@@ -51,7 +47,6 @@ function AdminUI.CreateMenu()
     SidebarCorner.CornerRadius = UDim.new(0, 8)
     SidebarCorner.Parent = Sidebar
     
-    -- Pages Container
     local PageContainer = Instance.new("Frame")
     PageContainer.Name = "PageContainer"
     PageContainer.Size = UDim2.new(1, -140, 1, -20)
@@ -131,7 +126,6 @@ function AdminUI.CreateMenu()
         Btn.MouseButton1Click:Connect(callback)
     end
     
-    -- Movement feature logic
     local isStealing = false
     CreateButton("Humanized Insta-Steal", MovementPage, function()
         if isStealing then return end
@@ -176,7 +170,6 @@ function AdminUI.CreateMenu()
         end)
     end)
     
-    -- Item Dupe Page template
     CreateButton("Safe Dupe (Simulation)", ItemPage, function()
         local character = Player.Character
         local targetItem = Workspace:FindFirstChild("BrainrotItem")
@@ -189,7 +182,6 @@ function AdminUI.CreateMenu()
         end
     end)
     
-    -- Animation Handling
     local menuVisible = true
     local animating = false
     
@@ -210,7 +202,6 @@ function AdminUI.CreateMenu()
         end
     end
     
-    -- Keybind trigger (PC users)
     UserInputService.InputBegan:Connect(function(input, processed)
         if processed then return end
         if input.KeyCode == Enum.KeyCode.LeftAlt or input.KeyCode == Enum.KeyCode.RightAlt then
@@ -218,7 +209,6 @@ function AdminUI.CreateMenu()
         end
     end)
     
-    -- Mobile Floating Button (Optimized for Mobile Executors like Xeno)
     local TouchButton = Instance.new("TextButton")
     TouchButton.Name = "ToggleButton"
     TouchButton.Size = UDim2.new(0, 50, 0, 50)
