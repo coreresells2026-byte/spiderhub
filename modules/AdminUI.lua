@@ -5,15 +5,11 @@ local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 local Workspace = game:GetService("Workspace")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Stats = game:GetService("Stats")
 
 function AdminUI.CreateMenu()
     local Player = Players.LocalPlayer
     local PlayerGui = Player:WaitForChild("PlayerGui")
-    
-    -- Locate the server communication layer
-    local RemoteFolder = ReplicatedStorage:WaitForChild("SpiderHubRemotes")
-    local ActionRemote = RemoteFolder:WaitForChild("RequestGameAction")
     
     if PlayerGui:FindFirstChild("SpiderHubUI") then
         PlayerGui.SpiderHubUI:Destroy()
@@ -71,17 +67,17 @@ function AdminUI.CreateMenu()
     MovementLayout.Padding = UDim.new(0, 10)
     MovementLayout.Parent = MovementPage
     
-    local ItemPage = Instance.new("Frame")
-    ItemPage.Name = "Item Dupe"
-    ItemPage.Size = UDim2.new(1, 0, 1, 0)
-    ItemPage.BackgroundTransparency = 1
-    ItemPage.Visible = false
-    ItemPage.Parent = PageContainer
+    local TelemetryPage = Instance.new("Frame")
+    TelemetryPage.Name = "Telemetry"
+    TelemetryPage.Size = UDim2.new(1, 0, 1, 0)
+    TelemetryPage.BackgroundTransparency = 1
+    TelemetryPage.Visible = false
+    TelemetryPage.Parent = PageContainer
     
-    local ItemLayout = Instance.new("UIListLayout")
-    ItemLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    ItemLayout.Padding = UDim.new(0, 10)
-    ItemLayout.Parent = ItemPage
+    local TelemetryLayout = Instance.new("UIListLayout")
+    TelemetryLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    TelemetryLayout.Padding = UDim.new(0, 10)
+    TelemetryLayout.Parent = TelemetryPage
     
     local UIListLayout = Instance.new("UIListLayout")
     UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
@@ -116,8 +112,8 @@ function AdminUI.CreateMenu()
         end)
     end
     
-    CreateTab("Movement Mods", MovementPage)
-    CreateTab("Item Dupe", ItemPage)
+    CreateTab("Camera Settings", MovementPage)
+    CreateTab("Telemetry Panel", TelemetryPage)
     
     local function CreateButton(text, parent, callback)
         local Btn = Instance.new("TextButton")
@@ -136,62 +132,77 @@ function AdminUI.CreateMenu()
         Btn.MouseButton1Click:Connect(callback)
     end
     
-    -- CONNECTING COMPLIANT ACTIONS TO THE SERVER REMOTES
-    local isStealing = false
-    CreateButton("Humanized Insta-Steal", MovementPage, function()
-        if isStealing then return end
+    -- PAGE 1 CONTENT: Client-Side Camera Properties
+    local FovLabel = Instance.new("TextLabel")
+    FovLabel.Size = UDim2.new(1, 0, 0, 20)
+    FovLabel.BackgroundTransparency = 1
+    FovLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    FovLabel.Text = "Field of View: 70"
+    FovLabel.Font = Enum.Font.SourceSans
+    FovLabel.TextSize = 14
+    FovLabel.TextXAlignment = Enum.TextXAlignment.Left
+    FovLabel.Parent = MovementPage
+    
+    CreateButton("Expand Field of View (+10)", MovementPage, function()
+        local camera = Workspace.CurrentCamera
+        if camera then
+            local newFov = camera.FieldOfView + 10
+            if newFov > 120 then newFov = 70 end
+            camera.FieldOfView = newFov
+            FovLabel.Text = "Field of View: " .. tostring(newFov)
+        end
+    end)
+    
+    CreateButton("Reset Local Camera View", MovementPage, function()
+        local camera = Workspace.CurrentCamera
+        if camera then
+            camera.FieldOfView = 70
+            FovLabel.Text = "Field of View: 70"
+        end
+    end)
+    
+    -- PAGE 2 CONTENT: Real-time Client Engine Telemetry
+    local FpsLabel = Instance.new("TextLabel")
+    FpsLabel.Size = UDim2.new(1, 0, 0, 25)
+    FpsLabel.BackgroundTransparency = 1
+    FpsLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    FpsLabel.Text = "FPS: Calculating..."
+    FpsLabel.Font = Enum.Font.SourceSans
+    FpsLabel.TextSize = 15
+    FpsLabel.TextXAlignment = Enum.TextXAlignment.Left
+    FpsLabel.Parent = TelemetryPage
+    
+    local PingLabel = FpsLabel:Clone()
+    PingLabel.Text = "Ping: Calculating..."
+    PingLabel.Parent = TelemetryPage
+    
+    local CoordLabel = FpsLabel:Clone()
+    CoordLabel.Text = "Coordinates: Vector3(0, 0, 0)"
+    CoordLabel.Parent = TelemetryPage
+    
+    local lastTime = os.clock()
+    local frameCount = 0
+    RunService.RenderStepped:Connect(function()
+        frameCount = frameCount + 1
+        local currentTime = os.clock()
+        if currentTime - lastTime >= 1 then
+            FpsLabel.Text = "FPS: " .. tostring(frameCount)
+            frameCount = 0
+            lastTime = currentTime
+            
+            local networkPing = math.round(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())
+            PingLabel.Text = "Network Ping: " .. tostring(networkPing) .. " ms"
+        end
+        
         local character = Player.Character
         local rootPart = character and character:FindFirstChild("HumanoidRootPart")
-        local targetZone = Workspace:FindFirstChild("Bases") 
-            and Workspace.Bases:FindFirstChild("RedBase") 
-            and Workspace.Bases.RedBase:FindFirstChild("DepositZone")
-            
-        if rootPart and targetZone then
-            isStealing = true
-            local startPos = rootPart.Position
-            local targetPos = targetZone.Position
-            local distance = (targetPos - startPos).Magnitude
-            local duration = distance / 15.5
-            
-            -- Smooth visual transition locally first
-            local tween = TweenService:Create(rootPart, TweenInfo.new(duration, Enum.EasingStyle.Linear), {CFrame = targetZone.CFrame})
-            tween:Play()
-            tween.Completed:Connect(function()
-                -- Confirm and finalize location directly on the server to prevent rubberbands
-                ActionRemote:FireServer("InstaSteal", targetZone.CFrame)
-                isStealing = false
-            end)
+        if rootPart then
+            local pos = rootPart.Position
+            CoordLabel.Text = string.format("Coordinates: X: %.1f, Y: %.1f, Z: %.1f", pos.X, pos.Y, pos.Z)
         end
     end)
     
-    local noclipActive = false
-    CreateButton("Phasing (NoClip)", MovementPage, function()
-        noclipActive = not noclipActive
-        if noclipActive then
-            -- Tell server to drop collisions globally
-            ActionRemote:FireServer("NoclipOn")
-            
-            -- Local loop to keep client fluid
-            RunService.PreSimulation:Connect(function()
-                local char = Player.Character
-                if char and noclipActive then
-                    for _, p in ipairs(char:GetDescendants()) do
-                        if p:IsA("BasePart") then p.CanCollide = false end
-                    end
-                end
-            end)
-        else
-            -- Tell server to restore original collisions
-            ActionRemote:FireServer("NoclipOff")
-        end
-    end)
-    
-    CreateButton("Safe Dupe", ItemPage, function()
-        -- Direct request to server to replicate a secure item clone
-        ActionRemote:FireServer("SafeDupe")
-    end)
-    
-    -- Open/Close Animations
+    -- Toggle Visibility Mechanics
     local menuVisible = true
     local animating = false
     
