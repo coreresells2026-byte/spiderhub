@@ -4,6 +4,7 @@ local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
+local Stats = game:GetService("Stats")
 local Workspace = game:GetService("Workspace")
 
 function AdminUI.CreateMenu()
@@ -54,19 +55,31 @@ function AdminUI.CreateMenu()
     PageContainer.BackgroundTransparency = 1
     PageContainer.Parent = MainFrame
     
-    local MovementPage = Instance.new("Frame")
-    MovementPage.Name = "Movement Mods"
-    MovementPage.Size = UDim2.new(1, 0, 1, 0)
-    MovementPage.BackgroundTransparency = 1
-    MovementPage.Visible = true
-    MovementPage.Parent = PageContainer
+    -- PAGE 1: DIAGNOSTICS
+    local DiagnosticsPage = Instance.new("Frame")
+    DiagnosticsPage.Name = "Diagnostics"
+    DiagnosticsPage.Size = UDim2.new(1, 0, 1, 0)
+    DiagnosticsPage.BackgroundTransparency = 1
+    DiagnosticsPage.Visible = true
+    DiagnosticsPage.Parent = PageContainer
     
-    local ItemPage = Instance.new("Frame")
-    ItemPage.Name = "Item Dupe"
-    ItemPage.Size = UDim2.new(1, 0, 1, 0)
-    ItemPage.BackgroundTransparency = 1
-    ItemPage.Visible = false
-    ItemPage.Parent = PageContainer
+    local DiagLayout = Instance.new("UIListLayout")
+    DiagLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    DiagLayout.Padding = UDim.new(0, 10)
+    DiagLayout.Parent = DiagnosticsPage
+    
+    -- PAGE 2: CAMERA/SETTINGS
+    local SettingsPage = Instance.new("Frame")
+    SettingsPage.Name = "Visual Settings"
+    SettingsPage.Size = UDim2.new(1, 0, 1, 0)
+    SettingsPage.BackgroundTransparency = 1
+    SettingsPage.Visible = false
+    SettingsPage.Parent = PageContainer
+    
+    local SettingsLayout = Instance.new("UIListLayout")
+    SettingsLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    SettingsLayout.Padding = UDim.new(0, 10)
+    SettingsLayout.Parent = SettingsPage
     
     local UIListLayout = Instance.new("UIListLayout")
     UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
@@ -101,87 +114,77 @@ function AdminUI.CreateMenu()
         end)
     end
     
-    CreateTab("Movement Mods", MovementPage)
-    CreateTab("Item Dupe", ItemPage)
+    CreateTab("Diagnostics", DiagnosticsPage)
+    CreateTab("Visual Settings", SettingsPage)
     
-    local function CreateButton(text, parent, callback)
-        local Btn = Instance.new("TextButton")
-        Btn.Size = UDim2.new(1, 0, 0, 40)
-        Btn.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
-        Btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-        Btn.Text = text
-        Btn.Font = Enum.Font.SourceSans
-        Btn.TextSize = 16
-        Btn.Parent = parent
-        
-        local BtnCorner = Instance.new("UICorner")
-        BtnCorner.CornerRadius = UDim.new(0, 6)
-        BtnCorner.Parent = Btn
-        
-        local PageLayout = parent:FindFirstChildOfClass("UIListLayout") or Instance.new("UIListLayout")
-        PageLayout.SortOrder = Enum.SortOrder.LayoutOrder
-        PageLayout.Padding = UDim.new(0, 10)
-        PageLayout.Parent = parent
-        
-        Btn.MouseButton1Click:Connect(callback)
-    end
+    -- Telemetry Trackers (Diagnostics Page)
+    local FpsLabel = Instance.new("TextLabel")
+    FpsLabel.Size = UDim2.new(1, 0, 0, 30)
+    FpsLabel.BackgroundTransparency = 1
+    FpsLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    FpsLabel.Text = "FPS: Calculating..."
+    FpsLabel.Font = Enum.Font.SourceSans
+    FpsLabel.TextSize = 16
+    FpsLabel.TextXAlignment = Enum.TextXAlignment.Left
+    FpsLabel.Parent = DiagnosticsPage
     
-    local isStealing = false
-    CreateButton("Humanized Insta-Steal", MovementPage, function()
-        if isStealing then return end
-        local character = Player.Character
-        local rootPart = character and character:FindFirstChild("HumanoidRootPart")
-        local targetZone = Workspace:FindFirstChild("Bases") 
-            and Workspace.Bases:FindFirstChild("RedBase") 
-            and Workspace.Bases.RedBase:FindFirstChild("DepositZone")
+    local PingLabel = FpsLabel:Clone()
+    PingLabel.Text = "Ping: Calculating..."
+    PingLabel.Parent = DiagnosticsPage
+    
+    -- Track FPS and Network Ping Safely via Performance Engine
+    local lastTime = os.clock()
+    local frameCount = 0
+    RunService.RenderStepped:Connect(function()
+        frameCount = frameCount + 1
+        local currentTime = os.clock()
+        if currentTime - lastTime >= 1 then
+            FpsLabel.Text = "FPS: " .. tostring(frameCount)
+            frameCount = 0
+            lastTime = currentTime
             
-        if rootPart and targetZone then
-            isStealing = true
-            local distance = (targetZone.CFrame.Position - rootPart.CFrame.Position).Magnitude
-            local duration = distance / 15.5
-            local tween = TweenService:Create(rootPart, TweenInfo.new(duration, Enum.EasingStyle.Linear), {CFrame = targetZone.CFrame})
-            tween:Play()
-            tween.Completed:Connect(function() isStealing = false end)
+            -- Grab standard network round-trip ping latency
+            local networkPing = math.round(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())
+            PingLabel.Text = "Network Ping: " .. tostring(networkPing) .. " ms"
         end
     end)
     
-    local noclipConnection = nil
-    CreateButton("Toggle Phasing (NoClip)", MovementPage, function()
-        if noclipConnection then
-            noclipConnection:Disconnect()
-            noclipConnection = nil
-            return
-        end
-        noclipConnection = RunService.PreSimulation:Connect(function()
-            local character = Player.Character
-            local torso = character and (character:FindFirstChild("Torso") or character:FindFirstChild("UpperTorso"))
-            local humanoid = character and character:FindFirstChildOfClass("Humanoid")
-            if torso and humanoid and humanoid.MoveDirection.Magnitude > 0 then
-                local params = RaycastParams.new()
-                params.FilterDescendantsInstances = {character}
-                params.FilterType = Enum.RaycastFilterType.Exclude
-                local result = Workspace:Raycast(torso.Position, humanoid.MoveDirection * 3, params)
-                if result and result.Instance and result.Instance:IsA("BasePart") and result.Instance.CanCollide then
-                    local part = result.Instance
-                    part.CanCollide = false
-                    task.delay(0.5, function() if part and part.Parent then part.CanCollide = true end end)
-                end
-            end
-        end)
-    end)
+    -- Client-Side FOV Setting Adjustment (Settings Page)
+    local FovLabel = Instance.new("TextLabel")
+    FovLabel.Size = UDim2.new(1, 0, 0, 20)
+    FovLabel.BackgroundTransparency = 1
+    FovLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    FovLabel.Text = "Field of View: 70"
+    FovLabel.Font = Enum.Font.SourceSans
+    FovLabel.TextSize = 16
+    FovLabel.TextXAlignment = Enum.TextXAlignment.Left
+    FovLabel.Parent = SettingsPage
     
-    CreateButton("Safe Dupe (Simulation)", ItemPage, function()
-        local character = Player.Character
-        local targetItem = Workspace:FindFirstChild("BrainrotItem")
-        if character and targetItem then
-            task.wait(0.25)
-            local clonedItem = targetItem:Clone()
-            if clonedItem:IsA("Model") then clonedItem:PivotTo(character:GetPivot() * CFrame.new(0, -2.5, 0))
-            elseif clonedItem:IsA("BasePart") then clonedItem.CFrame = character:GetPivot() * CFrame.new(0, -2.5, 0) clonedItem.Anchored = true end
-            clonedItem.Parent = Workspace
+    local FovButton = Instance.new("TextButton")
+    FovButton.Size = UDim2.new(1, 0, 0, 35)
+    FovButton.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
+    FovButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    FovButton.Text = "Increase FOV (+5)"
+    FovButton.Font = Enum.Font.SourceSansBold
+    FovButton.TextSize = 14
+    FovButton.Parent = SettingsPage
+    
+    local FovCorner = Instance.new("UICorner")
+    FovCorner.CornerRadius = UDim.new(0, 4)
+    FovCorner.Parent = FovButton
+    
+    FovButton.MouseButton1Click:Connect(function()
+        local camera = Workspace.CurrentCamera
+        if camera then
+            local currentFov = camera.FieldOfView
+            local newFov = currentFov + 5
+            if newFov > 120 then newFov = 70 end -- Reset loop boundary
+            camera.FieldOfView = newFov
+            FovLabel.Text = "Field of View: " .. tostring(newFov)
         end
     end)
     
+    -- Visibility Tweens
     local menuVisible = true
     local animating = false
     
