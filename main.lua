@@ -1,10 +1,10 @@
--- Pure Client-Side Loader for SpiderHub Architecture
+-- Production Client Loader for SpiderHub Architecture
 local success, moduleSource = pcall(function()
     return game:HttpGet("https://githubusercontent.com")
 end)
 
 if success and moduleSource then
-    -- Safety Check: Ensure GitHub didn't return a 404 page
+    -- Check if GitHub returned an invalid raw path or a 404 error page
     if string.find(moduleSource, "404: Not Found") or string.len(moduleSource) < 10 then
         warn("[SpiderHub Error]: AdminUI.lua path is invalid or misspelled on GitHub.")
         return
