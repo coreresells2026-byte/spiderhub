@@ -23,7 +23,7 @@ function AdminUI.CreateMenu()
     ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     ScreenGui.Parent = PlayerGui
     
-    -- Main Window Panel
+    -- Main Window Panel Frame
     local MainFrame = Instance.new("Frame")
     MainFrame.Name = "MainFrame"
     MainFrame.Size = UDim2.new(0, 450, 0, 300)
@@ -40,7 +40,7 @@ function AdminUI.CreateMenu()
     UICorner.CornerRadius = UDim.new(0, 8)
     UICorner.Parent = MainFrame
     
-    -- Sidebar Menu Tabs
+    -- Navigation Sidebar Panel Layout
     local Sidebar = Instance.new("Frame")
     Sidebar.Name = "Sidebar"
     Sidebar.Size = UDim2.new(0, 130, 1, 0)
@@ -52,6 +52,7 @@ function AdminUI.CreateMenu()
     SidebarCorner.CornerRadius = UDim.new(0, 8)
     SidebarCorner.Parent = Sidebar
     
+    -- Central Window Viewing Container Box
     local PageContainer = Instance.new("Frame")
     PageContainer.Name = "PageContainer"
     PageContainer.Size = UDim2.new(1, -140, 1, -20)
@@ -131,11 +132,13 @@ function AdminUI.CreateMenu()
         Btn.MouseButton1Click:Connect(callback)
     end
     
-    -- READ-ONLY DATA MODEL GAME EXPLORER (ROBLOX STUDIO REPLICA)
+    -- =============================================================================
+    -- ROBLOX STUDIO EXPLORER PANEL STYLE (READ ONLY ARCHITECTURE VIEW)
+    -- =============================================================================
     local ExplorerScroll = Instance.new("ScrollingFrame")
     ExplorerScroll.Size = UDim2.new(1, 0, 1, 0)
     ExplorerScroll.BackgroundTransparency = 1
-    ExplorerScroll.CanvasSize = UDim2.new(0, 0, 5, 0)
+    ExplorerScroll.CanvasSize = UDim2.new(0, 0, 6, 0)
     ExplorerScroll.ScrollBarThickness = 6
     ExplorerScroll.Parent = FileViewPage
     
@@ -169,21 +172,25 @@ function AdminUI.CreateMenu()
         end
     end
     
-    -- ADMINISTRATIVE STATE DIALOG SYSTEM
+    -- =============================================================================
+    -- ADMINISTRATIVE PROMPT OPERATIONS SYSTEM
+    -- =============================================================================
     local NotificationBox = Instance.new("TextLabel")
     NotificationBox.Size = UDim2.new(1, 0, 0, 40)
     NotificationBox.BackgroundTransparency = 1
     NotificationBox.TextColor3 = Color3.fromRGB(0, 255, 0)
-    NotificationBox.Text = "Status: Operational. Awaiting Selection Sequence..."
+    NotificationBox.Text = "Status: Operational. Awaiting Administrative Input Loop..."
     NotificationBox.Font = Enum.Font.SourceSansBold
     NotificationBox.TextSize = 13
     NotificationBox.TextWrapped = true
     NotificationBox.Parent = ItemPage
     
     CreateButton("Initiate Administrative Dupe Sequence", ItemPage, function()
+        -- Stage 1 Verification
         NotificationBox.Text = "SPIDER HUB ADMIN DUPE WORKING YOU MAY NOW CONTINUE"
         task.wait(1.5)
         
+        -- Stage 2 Verification UI Overlay Setup
         local DialogFrame = Instance.new("Frame")
         DialogFrame.Name = "PromptFrame"
         DialogFrame.Size = UDim2.new(0, 320, 0, 150)
@@ -231,16 +238,8 @@ function AdminUI.CreateMenu()
         NoBtn.Text = "NO"
         NoBtn.Parent = DialogFrame
         
-        -- YES Sequence Process: Clones user character configuration locally inside boundaries
+        -- YES Selection Configuration Loop
         YesBtn.MouseButton1Click:Connect(function()
             DialogFrame:Destroy()
-            NotificationBox.Text = "[System Processing]: Base zone targeting confirmed."
+            NotificationBox.Text = "[System Notice]: Target character picked. Place the clone down inside base parameters."
             
-            local character = Player.Character
-            if character then
-                character.Archivable = true
-                local clonedCharacter = character:Clone()
-                clonedCharacter.Parent = Workspace
-                
-                local rootPart = clonedCharacter:FindFirstChild("HumanoidRootPart")
-                if rootPart then
