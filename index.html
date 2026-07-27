@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SpiderHub Dashboard Diagnostics & Preview</title>
+    <style>
+        body {
+            background-color: #0b0b0c;
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        .container {
+            width: 100%;
+            max-width: 800px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .status-box {
+            background-color: #141416;
+            border: 2px solid #323238;
+            padding: 15px;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .status-indicator {
+            padding: 6px 12px;
+            background-color: #007800;
+            color: white;
+            font-weight: bold;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+        /* REAL SIMULATED ROBLOX IN-GAME PREVIEW FRAME */
+        .roblox-viewport {
+            width: 100%;
+            height: 450px;
+            background-color: #1e222b;
+            background-image: radial-gradient(#3a3f4d 1px, transparent 1px);
+            background-size: 20px 20px;
+            border: 2px solid #4a4d53;
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+        .spider-panel {
+            width: 420px;
+            height: 280px;
+            background-color: #121214;
+            border: 2px solid #ff0000;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.7);
+            display: flex;
+            flex-direction: column;
+        }
+        .panel-header {
+            height: 35px;
+            padding: 0 12px;
+            display: flex;
+            align-items: center;
+            color: #ff0000;
+            font-weight: bold;
+            font-size: 13px;
+            border-bottom: 1px solid #1c1c22;
+        }
+        .panel-body {
+            flex: 1;
+            display: flex;
+        }
+        .panel-sidebar {
+            width: 110px;
+            background-color: #0c0c0e;
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .tab-btn {
+            width: 100%;
+            padding: 6px;
+            background-color: #19191c;
+            border: none;
+            color: #c8c8c8;
+            font-weight: bold;
+            font-size: 11px;
+            text-align: center;
+            cursor: pointer;
+            border-radius: 2px;
+        }
+        .tab-btn.active {
+            background-color: #960000;
+            color: white;
+        }
+        .panel-content {
+            flex: 1;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            overflow-y: auto;
+        }
+        .control-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #18181c;
+            padding: 6px 10px;
+            border-radius: 4px;
+        }
+        .control-label {
+            font-size: 12px;
+            color: #dcdcdc;
+            font-weight: bold;
+        }
+        .action-btn {
+            padding: 4px 12px;
+            background-color: #28282d;
+            border: none;
+            color: white;
+            font-weight: bold;
+            font-size: 11px;
+            cursor: pointer;
+            border-radius: 2px;
+            min-width: 80px;
+        }
+        .action-btn.active {
+            background-color: #007800;
+        }
+        .slider-container {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            background-color: #18181c;
+            padding: 6px 10px;
+            border-radius: 4px;
+        }
+        .slider-bar {
+            width: 100%;
+            height: 6px;
+            background-color: #232328;
+            border-radius: 3px;
+            position: relative;
+        }
+        .slider-fill {
+            width: 15%;
+            height: 100%;
+            background-color: #ff0000;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- HARDWARE SYNC STATUS BAR -->
+    <div class="status-box">
+        <div>
+            <h3 style="margin: 0; font-size: 15px;">SpiderHub Script Loader Verification</h3>
+            <p style="margin: 4px 0 0 0; font-size: 12px; color: #a0a0a5;">Target Framework Environment: Xeno Mobile Client Emulator</p>
+        </div>
+        <div class="status-indicator" id="loadStatus">UI COMPILING: LOAD SUCCESS</div>
+    </div>
+
+    <!-- LIVE INTERACTIVE OVERLAY CANVAS -->
+    <div class="roblox-viewport">
+        <div class="spider-panel">
+            <div class="panel-header">SPIDERHUB ADAPTER INTERFACE | Press ALT to Toggle</div>
+            <div class="panel-body">
+                <!-- Tab Menu Grid -->
+                <div class="panel-sidebar">
+                    <button class="tab-btn active" onclick="switchTab('movement')">Movement</button>
+                    <button class="tab-btn" onclick="switchTab('network')">Network Loop</button>
+                </div>
+                <!-- Content Rows -->
+                <div class="panel-content" id="movementPage">
+                    <div class="control-row">
+                        <span class="control-label">NoClip</span>
+                        <button class="action-btn" id="noclipBtn" onclick="toggleFeature('noclipBtn')">ACTIVATE</button>
+                    </div>
+                    <div class="control-row">
+                        <span class="control-label">NoClips Not Working?</span>
+                        <button class="action-btn" style="background-color: #00bfff;">FIX</button>
+                    </div>
+                    <div class="control-row">
+                        <span class="control-label">Infinite Jump</span>
+                        <button class="action-btn" id="jumpBtn" onclick="toggleFeature('jumpBtn')">ACTIVATE</button>
+                    </div>
+                    <div class="slider-container">
+                        <div style="display: flex; justify-content: space-between; font-size: 11px; font-weight: bold; color: #b4b4b4;">
+                            <span>Speed Dial</span>
+                            <span>16</span>
+                        </div>
+                        <div class="slider-bar"><div class="slider-fill"></div></div>
+                    </div>
+                </div>
+                <div class="panel-content" id="networkPage" style="display: none;">
+                    <div class="control-row">
+                        <span class="control-label">Rubber Band Lag?</span>
+                        <button class="action-btn" style="background-color: #ff8c00;">FIX</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Live Browser Interactive Preview Logic Hooks
+    function switchTab(tabName) {
+        const tabs = document.querySelectorAll('.tab-btn');
+        tabs.forEach(t => t.classList.remove('active'));
+        event.target.classList.add('active');
+
+        if(tabName === 'movement') {
+            document.getElementById('movementPage').style.display = 'flex';
+            document.getElementById('networkPage').style.display = 'none';
+        } else {
+            document.getElementById('movementPage').style.display = 'none';
+            document.getElementById('networkPage').style.display = 'flex';
+        }
+    }
+
+    function toggleFeature(id) {
+        const btn = document.getElementById(id);
+        if(btn.classList.contains('active')) {
+            btn.classList.remove('active');
+            btn.innerText = 'ACTIVATE';
+        } else {
+            btn.classList.add('active');
+            btn.innerText = 'ACTIVE';
+        }
+    }
+</script>
+</body>
+</html>
