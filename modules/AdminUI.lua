@@ -2,7 +2,6 @@ local AdminUI = {}
 
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
-local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 local Workspace = game:GetService("Workspace")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -11,7 +10,9 @@ local SoundService = game:GetService("SoundService")
 
 function AdminUI.CreateMenu()
     local Player = Players.LocalPlayer
-    local PlayerGui = Player:WaitForChild("PlayerGui")
+    local PlayerGui = Player and (Player:FindFirstChild("PlayerGui") or game:GetService("CoreGui"))
+    
+    if not PlayerGui then return end
     
     if PlayerGui:FindFirstChild("SpiderHubUI") then
         PlayerGui.SpiderHubUI:Destroy()
@@ -94,14 +95,9 @@ function AdminUI.CreateMenu()
         TabBtn.TextSize = 14
         TabBtn.Parent = Sidebar
         
-        local BtnCorner = Instance.new("UICorner")
-        BtnCorner.CornerRadius = UDim.new(0, 4)
-        BtnCorner.Parent = TabBtn
-        
         TabBtn.MouseButton1Click:Connect(function()
-            for _, page in ipairs(PageContainer:GetChildren()) do
-                if page:IsA("Frame") then page.Visible = false end
-            end
+            ItemPage.Visible = false
+            FileViewPage.Visible = false
             targetPage.Visible = true
         end)
     end
@@ -119,10 +115,6 @@ function AdminUI.CreateMenu()
         Btn.TextSize = 16
         Btn.Parent = parent
         
-        local BtnCorner = Instance.new("UICorner")
-        BtnCorner.CornerRadius = UDim.new(0, 6)
-        BtnCorner.Parent = Btn
-        
         local Layout = parent:FindFirstChildOfClass("UIListLayout") or Instance.new("UIListLayout")
         Layout.SortOrder = Enum.SortOrder.LayoutOrder
         Layout.Padding = UDim.new(0, 10)
@@ -132,12 +124,12 @@ function AdminUI.CreateMenu()
     end
     
     -- =============================================================================
-    -- DATA MODEL EXPLORER LAYOUT (ROBLOX STUDIO REPLICA)
+    -- ROBLOX STUDIO ENVIRONMENT LAYOUT TREE VIEW PANEL (READ-ONLY)
     -- =============================================================================
     local ExplorerScroll = Instance.new("ScrollingFrame")
     ExplorerScroll.Size = UDim2.new(1, 0, 1, 0)
     ExplorerScroll.BackgroundTransparency = 1
-    ExplorerScroll.CanvasSize = UDim2.new(0, 0, 6, 0)
+    ExplorerScroll.CanvasSize = UDim2.new(0, 0, 5, 0)
     ExplorerScroll.ScrollBarThickness = 6
     ExplorerScroll.Parent = FileViewPage
     
@@ -158,39 +150,45 @@ function AdminUI.CreateMenu()
         ServiceLabel.TextXAlignment = Enum.TextXAlignment.Left
         ServiceLabel.Parent = ExplorerScroll
         
-        -- Safe asset fetch loops to prevent execution freezes
-        for _, child in ipairs(service:GetChildren()) do
-            local ChildLabel = Instance.new("TextLabel")
-            ChildLabel.Size = UDim2.new(1, 0, 0, 18)
-            ChildLabel.BackgroundTransparency = 1
-            ChildLabel.TextColor3 = Color3.fromRGB(220, 220, 220)
-            ChildLabel.Text = "    📄 [" .. child.ClassName .. "] " .. child.Name
-            ChildLabel.Font = Enum.Font.SourceSans
-            ChildLabel.TextSize = 13
-            ChildLabel.TextXAlignment = Enum.TextXAlignment.Left
-            ChildLabel.Parent = ExplorerScroll
-        end
+        pcall(function()
+            for _, child in ipairs(service:GetChildren()) do
+                local ChildLabel = Instance.new("TextLabel")
+                ChildLabel.Size = UDim2.new(1, 0, 0, 18)
+                ChildLabel.BackgroundTransparency = 1
+                ChildLabel.TextColor3 = Color3.fromRGB(220, 220, 220)
+                ChildLabel.Text = "    📄 [" .. child.ClassName .. "] " .. child.Name
+                ChildLabel.Font = Enum.Font.SourceSans
+                ChildLabel.TextSize = 13
+                ChildLabel.TextXAlignment = Enum.TextXAlignment.Left
+                ChildLabel.Parent = ExplorerScroll
+            end
+        end)
     end
     
     -- =============================================================================
-    -- TWO-STAGE ADMINISTRATIVE OVERLAY DIALOG SYSTEM
+    -- ADMINISTRATIVE WORKFLOW POPUP LOGIC Engine
     -- =============================================================================
     local NotificationBox = Instance.new("TextLabel")
     NotificationBox.Size = UDim2.new(1, 0, 0, 40)
     NotificationBox.BackgroundTransparency = 1
     NotificationBox.TextColor3 = Color3.fromRGB(0, 255, 0)
-    NotificationBox.Text = "Status: Operational. Awaiting Execution Trigger..."
+    NotificationBox.Text = "Status: Online. Pickup detection system engaged."
     NotificationBox.Font = Enum.Font.SourceSansBold
     NotificationBox.TextSize = 13
     NotificationBox.TextWrapped = true
     NotificationBox.Parent = ItemPage
     
-    CreateButton("Initiate Administrative Dupe Sequence", ItemPage, function()
-        -- Stage 1 Layout Response Confirmation Label
+    local lastInteractedModel = nil
+    local dialogActive = false
+    
+    local function TriggerConfirmationWorkflow(targetModel)
+        if dialogActive then return end
+        dialogActive = true
+        lastInteractedModel = targetModel
+        
         NotificationBox.Text = "SPIDER HUB ADMIN DUPE WORKING YOU MAY NOW CONTINUE"
         task.wait(1.5)
         
-        -- Stage 2 Prompt Frame Generation Overlay
         local DialogFrame = Instance.new("Frame")
         DialogFrame.Name = "PromptFrame"
         DialogFrame.Size = UDim2.new(0, 320, 0, 150)
@@ -201,18 +199,14 @@ function AdminUI.CreateMenu()
         DialogFrame.ZIndex = 10
         DialogFrame.Parent = ScreenGui
         
-        local DialogCorner = Instance.new("UICorner")
-        DialogCorner.CornerRadius = UDim.new(0, 6)
-        DialogCorner.Parent = DialogFrame
-        
         local MsgLabel = Instance.new("TextLabel")
         MsgLabel.Size = UDim2.new(1, -20, 0, 60)
         MsgLabel.Position = UDim2.new(0, 10, 0, 10)
         MsgLabel.BackgroundTransparency = 1
         MsgLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-        MsgLabel.Text = "SPIDER HUB ADMIN DUPE WORKING DO YOU WANT TO CONTINUE?"
+        MsgLabel.Text = "SPIDER HUB ADMIN DUPE WORKING DO YOU WANT TO CONTINUE? |YES| |NO|"
         MsgLabel.Font = Enum.Font.SourceSansBold
-        MsgLabel.TextSize = 14
+        MsgLabel.TextSize = 13
         MsgLabel.TextWrapped = true
         MsgLabel.ZIndex = 10
         MsgLabel.Parent = DialogFrame
@@ -228,16 +222,23 @@ function AdminUI.CreateMenu()
         YesBtn.ZIndex = 10
         YesBtn.Parent = DialogFrame
         
-        local YesCorner = Instance.new("UICorner")
-        YesCorner.CornerRadius = UDim.new(0, 4)
-        YesCorner.Parent = YesBtn
-        
         local NoBtn = YesBtn:Clone()
         NoBtn.Position = UDim2.new(0, 180, 0, 85)
         NoBtn.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
         NoBtn.Text = "NO"
         NoBtn.Parent = DialogFrame
         
-        -- YES Process Trigger: Clones player model configuration locally inside boundaries
         YesBtn.MouseButton1Click:Connect(function()
             DialogFrame:Destroy()
+            NotificationBox.Text = "[Processing]: Rendering placement data..."
+            
+            if lastInteractedModel and lastInteractedModel.Parent then
+                pcall(function()
+                    lastInteractedModel.Archivable = true
+                    local localClone = lastInteractedModel:Clone()
+                    
+                    if localClone:IsA("Model") then
+                        localClone:PivotTo(lastInteractedModel:GetPivot() * CFrame.new(6, 0, 6))
+                    elseif localClone:IsA("BasePart") then
+                        localClone.CFrame = lastInteractedModel.CFrame * CFrame.new(6, 0, 6)
+                    end
