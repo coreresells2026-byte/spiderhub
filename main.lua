@@ -72,10 +72,25 @@ if PlayerGui then
     LogoLabel.Size = UDim2.new(0, 120, 0, 75) 
     LogoLabel.Position = UDim2.new(0, 20, 0.5, -37) -- padding: 0 20px
     LogoLabel.BackgroundTransparency = 1
-    -- 🔴 Replace 134444555 with your personal Roblox Decal Asset ID number to load your red spider logo!
-    LogoLabel.Image = "rbxassetid://134444555" 
     LogoLabel.ScaleType = Enum.ScaleType.Fit
     LogoLabel.Parent = PanelHeader
+
+    -- =============================================================================
+    -- GITHUB LOGO FILE CACHING HANDSHAKE (No Roblox Upload Needed!)
+    -- =============================================================================
+    pcall(function()
+        -- 🔴 CHANGE "YourUsername" AND "YourRepoName" TO MATCH YOUR EXACT GITHUB DETAILS BELOW!
+        local gitRawUrl = "https://githubusercontent.com"
+        local cachedFileName = "spiderhub_v4_logo.png"
+
+        -- Download and cache the png straight to your Xeno storage folder seamlessly
+        if not isfile(cachedFileName) then
+            local dataStream = game:HttpGet(gitRawUrl)
+            writefile(cachedFileName, dataStream)
+        end
+        -- Generate the custom asset pointer string
+        LogoLabel.Image = getcustomasset(cachedFileName)
+    end)
 
     local TitleText = Instance.new("TextLabel")
     TitleText.Size = UDim2.new(1, -180, 1, 0)
@@ -152,7 +167,7 @@ if PlayerGui then
     NetworkPage.Visible = false
     NetworkPage.Parent = ContentFrame
 
-    -- Row Layout Generator Module (Translates control rows, button sizing, and text colors)
+    -- Row Layout Generator Module
     local function CreateInGameControlRow(targetPage, labelText, buttonText, yPos, callback)
         local RowFrame = Instance.new("Frame")
         RowFrame.Size = UDim2.new(1, -32, 0, 42)
@@ -200,14 +215,3 @@ if PlayerGui then
         BtnCorner.CornerRadius = UDim.new(0, 4) -- border-radius: 4px
         BtnCorner.Parent = Btn
 
-        Btn.MouseButton1Click:Connect(function() callback(Btn) end)
-    end
-
-    -- Tab Switching Logic Engine
-    MovementTab.MouseButton1Click:Connect(function()
-        MovementTab.BackgroundColor3 = Color3.fromRGB(128, 0, 0) MovementTab.TextColor3 = Color3.fromRGB(255, 255, 255)
-        NetworkTab.BackgroundColor3 = Color3.fromRGB(16, 16, 19) NetworkTab.TextColor3 = Color3.fromRGB(160, 160, 165)
-        MovementPage.Visible = true NetworkPage.Visible = false
-    end)
-    NetworkTab.MouseButton1Click:Connect(function()
-        NetworkTab.BackgroundColor3 = Color3.fromRGB(128, 0, 0) NetworkTab.TextColor3 = Color3.fromRGB(255, 255, 255)
