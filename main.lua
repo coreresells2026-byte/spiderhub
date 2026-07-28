@@ -76,19 +76,19 @@ if PlayerGui then
     LogoLabel.Parent = PanelHeader
 
     -- =============================================================================
-    -- GITHUB LOGO FILE CACHING HANDSHAKE (No Roblox Upload Needed!)
+    -- GITHUB LOGO FILE CACHING HANDSHAKE (No Roblox Asset ID Upload Needed!)
     -- =============================================================================
     pcall(function()
-        -- 🔴 CHANGE "YourUsername" AND "YourRepoName" TO MATCH YOUR EXACT GITHUB DETAILS BELOW!
+        -- ⚠️ REMEMBER: CHANGE "YourUsername" AND "YourRepoName" TO MATCH YOUR GITHUB LINK EXACTLY!
         local gitRawUrl = "https://githubusercontent.com"
         local cachedFileName = "spiderhub_v4_logo.png"
 
-        -- Download and cache the png straight to your Xeno storage folder seamlessly
+        -- Download and cache the png straight to your local Xeno storage folder seamlessly
         if not isfile(cachedFileName) then
             local dataStream = game:HttpGet(gitRawUrl)
             writefile(cachedFileName, dataStream)
         end
-        -- Generate the custom asset pointer string
+        -- Generate the custom local asset file pointer string
         LogoLabel.Image = getcustomasset(cachedFileName)
     end)
 
@@ -212,6 +212,3 @@ if PlayerGui then
         BtnStroke.Parent = Btn
 
         local BtnCorner = Instance.new("UICorner")
-        BtnCorner.CornerRadius = UDim.new(0, 4) -- border-radius: 4px
-        BtnCorner.Parent = Btn
-
