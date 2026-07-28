@@ -1,5 +1,5 @@
 -- =============================================================================
--- SPIDERHUB ADVANCED CATEGORIZED INTERFACE SUITE (GITHUB SOURCE)
+-- SPIDERHUB CODES ENGINE V4.0 (EXACT HTML TRANSLATION PROFILES)
 -- =============================================================================
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
@@ -9,218 +9,205 @@ local Workspace = game:GetService("Workspace")
 local Player = Players.LocalPlayer
 local PlayerGui = Player and (Player:FindFirstChild("PlayerGui") or game:GetService("CoreGui"))
 
--- Safely clear out any old ui elements to prevent compilation stutters
-if PlayerGui:FindFirstChild("SpiderAirWalkUI") then PlayerGui.SpiderAirWalkUI:Destroy() end
+if PlayerGui then
+    -- Safely clear previous interface instances to avoid multi-thread duplication glitches
+    local oldUI = PlayerGui:FindFirstChild("SpiderAirWalkUI")
+    if oldUI then oldUI:Destroy() end
 
--- Initialize an advanced, lightweight fluid UI engine locally
-local MaterialLib = {}
-pcall(function()
-    -- Directly generates an elegant dark-themed dashboard container natively
-    function MaterialLib:LoadWindow(title)
-        local ScreenGui = Instance.new("ScreenGui")
-        ScreenGui.Name = "SpiderAirWalkUI"
-        ScreenGui.ResetOnSpawn = false
-        ScreenGui.Parent = PlayerGui
+    -- 1. Main Core ScreenGui Construction (Visible ONLY on your device)
+    local ScreenGui = Instance.new("ScreenGui")
+    ScreenGui.Name = "SpiderAirWalkUI"
+    ScreenGui.ResetOnSpawn = false
+    ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    ScreenGui.Parent = PlayerGui
 
-        local Main = Instance.new("Frame")
-        Main.Size = UDim2.new(0, 420, 0, 280)
-        Main.Position = UDim2.new(0.5, -210, 0.3, -140)
-        Main.BackgroundColor3 = Color3.fromRGB(18, 18, 20)
-        Main.BorderSizePixel = 2
-        Main.BorderColor3 = Color3.fromRGB(255, 0, 0) -- Neon Red Theme Accent
-        Main.Active = true
-        Main.Draggable = true
-        Main.Parent = ScreenGui
+    -- 2. Master Dashboard Window Panel (Matches 580x420 HTML Matrix Exactly)
+    local MainFrame = Instance.new("Frame")
+    MainFrame.Name = "MainFrame"
+    MainFrame.Size = UDim2.new(0, 580, 0, 420)
+    MainFrame.Position = UDim2.new(0.5, -290, 0.4, -210)
+    MainFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 12) -- Exact background-color: #0a0a0c
+    MainFrame.BorderSizePixel = 0
+    MainFrame.Active = true
+    MainFrame.Draggable = true
+    MainFrame.Parent = ScreenGui
 
-        local Title = Instance.new("TextLabel")
-        Title.Size = UDim2.new(1, -20, 0, 30)
-        Title.Position = UDim2.new(0, 10, 0, 5)
-        Title.BackgroundTransparency = 1
-        Title.Text = title .. " | Press ALT to Toggle"
-        Title.TextColor3 = Color3.fromRGB(255, 0, 0)
-        Title.Font = Enum.Font.SourceSansBold
-        Title.TextSize = 14
-        Title.TextXAlignment = Enum.TextXAlignment.Left
-        Title.Parent = Main
+    -- Red Outer Border Stroke (Matches border: 2px solid #ff0000)
+    local PanelBorder = Instance.new("UIStroke")
+    PanelBorder.Thickness = 2
+    PanelBorder.Color = Color3.fromRGB(255, 0, 0)
+    PanelBorder.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+    PanelBorder.Parent = MainFrame
 
-        -- Category Sidebar Navigation Container
-        local Sidebar = Instance.new("Frame")
-        Sidebar.Size = UDim2.new(0, 110, 1, -40)
-        Sidebar.Position = UDim2.new(0, 10, 0, 35)
-        Sidebar.BackgroundColor3 = Color3.fromRGB(12, 12, 14)
-        Sidebar.BorderSizePixel = 0
-        Sidebar.Parent = Main
+    -- Round the corners slightly (Matches border-radius: 6px)
+    local PanelCorner = Instance.new("UICorner")
+    PanelCorner.CornerRadius = UDim.new(0, 6)
+    PanelCorner.Parent = MainFrame
 
-        local SidebarLayout = Instance.new("UIListLayout")
-        SidebarLayout.Padding = UDim.new(0, 4)
-        SidebarLayout.Parent = Sidebar
+    -- =============================================================================
+    -- PREALIGNED PANEL HEADER REGISTRY (Matches 95px height gradient header)
+    -- =============================================================================
+    local PanelHeader = Instance.new("Frame")
+    PanelHeader.Name = "PanelHeader"
+    PanelHeader.Size = UDim2.new(1, 0, 0, 95) -- Exact 95px expanded HTML height parameters
+    PanelHeader.BackgroundColor3 = Color3.fromRGB(18, 18, 21) -- background: #121215
+    PanelHeader.BorderSizePixel = 0
+    PanelHeader.Parent = MainFrame
 
-        -- Dynamic Page Content Window
-        local ContentFrame = Instance.new("Frame")
-        ContentFrame.Size = UDim2.new(1, -140, 1, -40)
-        ContentFrame.Position = UDim2.new(0, 130, 0, 35)
-        ContentFrame.BackgroundTransparency = 1
-        ContentFrame.Parent = Main
+    -- Round only the top corners of the header bar to preserve panel aesthetics
+    local HeaderCorner = Instance.new("UICorner")
+    HeaderCorner.CornerRadius = UDim.new(0, 6)
+    HeaderCorner.Parent = PanelHeader
 
-        local windowInstance = {Main = Main, Sidebar = Sidebar, Content = ContentFrame, CurrentPage = nil}
+    local HeaderBottomLine = Instance.new("Frame")
+    HeaderBottomLine.Size = UDim2.new(1, 0, 0, 1)
+    HeaderBottomLine.Position = UDim2.new(0, 0, 1, -1)
+    HeaderBottomLine.BackgroundColor3 = Color3.fromRGB(26, 26, 34) -- border-bottom: 1px solid #1a1a22
+    HeaderBottomLine.BorderSizePixel = 0
+    HeaderBottomLine.Parent = PanelHeader
 
-        function windowInstance:CreateCategory(name)
-            local TabBtn = Instance.new("TextButton")
-            TabBtn.Size = UDim2.new(1, 0, 0, 28)
-            TabBtn.BackgroundColor3 = Color3.fromRGB(25, 25, 28)
-            TabBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
-            TabBtn.Text = name
-            TabBtn.Font = Enum.Font.SourceSansBold
-            TabBtn.TextSize = 12
-            TabBtn.Parent = Sidebar
+    -- Massive Spider Logo Image Placement Asset (Matches 120x75 logo.png container)
+    local LogoLabel = Instance.new("ImageLabel")
+    LogoLabel.Name = "LogoLabel"
+    LogoLabel.Size = UDim2.new(0, 120, 0, 75) 
+    LogoLabel.Position = UDim2.new(0, 20, 0.5, -37) -- padding: 0 20px
+    LogoLabel.BackgroundTransparency = 1
+    -- 🔴 Replace 134444555 with your personal Roblox Decal Asset ID number to load your red spider logo!
+    LogoLabel.Image = "rbxassetid://134444555" 
+    LogoLabel.ScaleType = Enum.ScaleType.Fit
+    LogoLabel.Parent = PanelHeader
 
-            local Page = Instance.new("ScrollingFrame")
-            Page.Size = UDim2.new(1, 0, 1, 0)
-            Page.BackgroundTransparency = 1
-            Page.CanvasSize = UDim2.new(0, 0, 0, 0)
-            Page.ScrollBarThickness = 2
-            Page.Visible = false
-            Page.Parent = ContentFrame
+    local TitleText = Instance.new("TextLabel")
+    TitleText.Size = UDim2.new(1, -180, 1, 0)
+    TitleText.Position = UDim2.new(0, 164, 0, 0) -- gap: 24px layout offset
+    TitleText.BackgroundTransparency = 1
+    TitleText.TextColor3 = Color3.fromRGB(255, 0, 0) -- color: #ff0000
+    TitleText.Text = "SPIDERHUB PREMIUM V4.0"
+    TitleText.Font = Enum.Font.SourceSansBold
+    TitleText.TextSize = 18 -- font-size: 18px
+    TitleText.TextXAlignment = Enum.TextXAlignment.Left
+    TitleText.Parent = PanelHeader
 
-            local PageLayout = Instance.new("UIListLayout")
-            PageLayout.Padding = UDim.new(0, 6)
-            PageLayout.Parent = Page
+    -- =============================================================================
+    -- SIDEBAR NAVIGATION RAIL GRID ARCHITECTURE
+    -- =============================================================================
+    local PanelBody = Instance.new("Frame")
+    PanelBody.Size = UDim2.new(1, 0, 1, -95)
+    PanelBody.Position = UDim2.new(0, 0, 0, 95)
+    PanelBody.BackgroundTransparency = 1
+    PanelBody.Parent = MainFrame
 
-            if not windowInstance.CurrentPage then
-                windowInstance.CurrentPage = Page
-                Page.Visible = true
-                TabBtn.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
-                TabBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-            end
+    local PanelSidebar = Instance.new("Frame")
+    PanelSidebar.Size = UDim2.new(0, 130, 1, 0) -- width: 130px
+    PanelSidebar.BackgroundColor3 = Color3.fromRGB(5, 5, 7) -- background-color: #050507
+    PanelSidebar.BorderSizePixel = 0
+    PanelSidebar.Parent = PanelBody
 
-            TabBtn.MouseButton1Click:Connect(function()
-                if windowInstance.CurrentPage then windowInstance.CurrentPage.Visible = false end
-                for _, btn in ipairs(Sidebar:GetChildren()) do
-                    if btn:IsA("TextButton") then 
-                        btn.BackgroundColor3 = Color3.fromRGB(25, 25, 28) 
-                        btn.TextColor3 = Color3.fromRGB(200, 200, 200)
-                    end
-                end
-                TabBtn.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
-                TabBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-                Page.Visible = true
-                windowInstance.CurrentPage = Page
-            end)
+    local SidebarDivider = Instance.new("Frame")
+    SidebarDivider.Size = UDim2.new(0, 1, 1, 0)
+    SidebarDivider.Position = UDim2.new(1, -1, 0, 0)
+    SidebarDivider.BackgroundColor3 = Color3.fromRGB(20, 20, 26) -- border-right: 1px solid #14141a
+    SidebarDivider.BorderSizePixel = 0
+    SidebarDivider.Parent = PanelSidebar
 
-            local pageInstance = {Frame = Page}
-
-            function pageInstance:Button(text, callback)
-                local Row = Instance.new("Frame")
-                Row.Size = UDim2.new(1, -10, 0, 32)
-                Row.BackgroundTransparency = 1
-                Row.Parent = Page
-
-                local Btn = Instance.new("TextButton")
-                Btn.Size = UDim2.new(1, 0, 1, 0)
-                Btn.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
-                Btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-                Btn.Text = text
-                Btn.Font = Enum.Font.SourceSansBold
-                Btn.TextSize = 13
-                Btn.Parent = Row
-
-                Btn.MouseButton1Click:Connect(function() callback(Btn) end)
-                Page.CanvasSize = UDim2.new(0, 0, 0, PageLayout.AbsoluteContentSize.Y + 20)
-            end
-
-            function pageInstance:Slider(text, min, max, default, callback)
-                local Row = Instance.new("Frame")
-                Row.Size = UDim2.new(1, -10, 0, 45)
-                Row.BackgroundTransparency = 1
-                Row.Parent = Page
-
-                local Label = Instance.new("TextLabel")
-                Label.Size = UDim2.new(1, 0, 0, 18)
-                Label.BackgroundTransparency = 1
-                Label.TextColor3 = Color3.fromRGB(180, 180, 180)
-                Label.Text = text .. ": " .. tostring(default)
-                Label.Font = Enum.Font.SourceSansBold
-                Label.TextSize = 12
-                Label.TextXAlignment = Enum.TextXAlignment.Left
-                Label.Parent = Row
-
-                local SliderBg = Instance.new("Frame")
-                SliderBg.Size = UDim2.new(1, 0, 0, 8)
-                SliderBg.Position = UDim2.new(0, 0, 0, 24)
-                SliderBg.BackgroundColor3 = Color3.fromRGB(35, 35, 40)
-                SliderBg.BorderSizePixel = 0
-                SliderBg.Parent = Row
-
-                local SliderFill = Instance.new("Frame")
-                local startRatio = math.clamp((default - min) / (max - min), 0, 1)
-                SliderFill.Size = UDim2.new(startRatio, 0, 1, 0)
-                SliderFill.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-                SliderFill.BorderSizePixel = 0
-                SliderFill.Parent = SliderBg
-
-                local Dragging = false
-                local function UpdateSliderValue(input)
-                    local ratio = math.clamp((input.Position.X - SliderBg.AbsolutePosition.X) / SliderBg.AbsoluteSize.X, 0, 1)
-                    SliderFill.Size = UDim2.new(ratio, 0, 1, 0)
-                    local finalValue = math.floor(min + (ratio * (max - min)))
-                    Label.Text = text .. ": " .. tostring(finalValue)
-                    callback(finalValue)
-                end
-
-                SliderBg.InputBegan:Connect(function(input)
-                    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-                        Dragging = true
-                        UpdateSliderValue(input)
-                    end
-                end)
-                UserInputService.InputChanged:Connect(function(input)
-                    if Dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-                        UpdateSliderValue(input)
-                    end
-                end)
-                UserInputService.InputEnded:Connect(function(input)
-                    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-                        Dragging = false
-                    end
-                end)
-                Page.CanvasSize = UDim2.new(0, 0, 0, PageLayout.AbsoluteContentSize.Y + 20)
-            end
-
-            return pageInstance
-        end
-
-        UserInputService.InputBegan:Connect(function(input, processed)
-            if processed then return end
-            if input.KeyCode == Enum.KeyCode.LeftAlt or input.KeyCode == Enum.KeyCode.RightAlt then
-                Main.Visible = not Main.Visible
-            end
-        end)
-
-        return windowInstance
+    local MovementTab = Instance.new("TextButton")
+    MovementTab.Size = UDim2.new(1, -24, 0, 38)
+    MovementTab.Position = UDim2.new(0, 12, 0, 12)
+    MovementTab.BackgroundColor3 = Color3.fromRGB(128, 0, 0) -- background: active red gradient
+    if MovementTab:FindFirstChildOfClass("UICorner") == nil then
+        local BtnCorner = Instance.new("UICorner")
+        BtnCorner.CornerRadius = UDim.new(0, 4)
+        BtnCorner.Parent = MovementTab
     end
-end)
+    MovementTab.TextColor3 = Color3.fromRGB(255, 255, 255)
+    MovementTab.Text = "Movement"
+    MovementTab.Font = Enum.Font.SourceSansBold
+    MovementTab.TextSize = 13
+    MovementTab.Parent = PanelSidebar
 
--- =============================================================================
--- INTERFACE LAYER DESIGN ARCHITECTURE (Categories Setup)
--- =============================================================================
-local HubWindow = MaterialLib:LoadWindow("SPIDERHUB ADAPTER INTERFACE")
-local MovementTab = HubWindow:CreateCategory("Movement")
-local NetworkTab = HubWindow:CreateCategory("Network Loop")
+    local NetworkTab = MovementTab:Clone()
+    NetworkTab.Position = UDim2.new(0, 12, 0, 56)
+    NetworkTab.BackgroundColor3 = Color3.fromRGB(16, 16, 19) -- background-color: #101013
+    NetworkTab.TextColor3 = Color3.fromRGB(160, 160, 165) -- color: #a0a0a5
+    NetworkTab.Text = "Network Loop"
+    NetworkTab.Parent = PanelSidebar
 
--- Functional State Registries
-local noclipActive = false
-local noclipConnection = nil
-local flightConnection = nil
-local customHeightValue = 0
-local currentWalkSpeedSetting = 16
+    -- =============================================================================
+    -- RIGHT CONTENT CONTAINER ARCHITECTURE PAGES
+    -- =============================================================================
+    local ContentFrame = Instance.new("Frame")
+    ContentFrame.Size = UDim2.new(1, -130, 1, 0)
+    ContentFrame.Position = UDim2.new(0, 130, 0, 0)
+    ContentFrame.BackgroundTransparency = 1
+    ContentFrame.Parent = PanelBody
 
--- 1. CATEGORY: MOVEMENT CONTROLS
-MovementTab:Button("NoClip: ACTIVATE", function(btn)
-    noclipActive = not noclipActive
-    if noclipActive then
-        btn.BackgroundColor3 = Color3.fromRGB(0, 120, 0)
-        btn.Text = "NoClip: ACTIVE"
-        
-        local character = Player.Character
-        local rootPart = character and character:FindFirstChild("HumanoidRootPart")
-        if rootPart then customHeightValue = rootPart.Position.Y end
+    local MovementPage = Instance.new("ScrollingFrame")
+    MovementPage.Size = UDim2.new(1, 0, 1, 0)
+    MovementPage.BackgroundTransparency = 1
+    MovementPage.ScrollBarThickness = 2
+    MovementPage.CanvasSize = UDim2.new(0, 0, 0, 320)
+    MovementPage.Parent = ContentFrame
+
+    local NetworkPage = MovementPage:Clone()
+    NetworkPage.Visible = false
+    NetworkPage.Parent = ContentFrame
+
+    -- Row Layout Generator Module (Translates control rows, button sizing, and text colors)
+    local function CreateInGameControlRow(targetPage, labelText, buttonText, yPos, callback)
+        local RowFrame = Instance.new("Frame")
+        RowFrame.Size = UDim2.new(1, -32, 0, 42)
+        RowFrame.Position = UDim2.new(0, 16, 0, yPos) -- padding: 16px
+        RowFrame.BackgroundColor3 = Color3.fromRGB(17, 17, 21) -- background-color: #111115
+        RowFrame.BorderSizePixel = 0
+        RowFrame.Parent = targetPage
+
+        local RowBorder = Instance.new("UIStroke")
+        RowBorder.Thickness = 1
+        RowBorder.Color = Color3.fromRGB(24, 24, 32) -- border: 1px solid #181820
+        RowBorder.Parent = RowFrame
+
+        local RowCorner = Instance.new("UICorner")
+        RowCorner.CornerRadius = UDim.new(0, 5) -- border-radius: 5px
+        RowCorner.Parent = RowFrame
+
+        local Label = Instance.new("TextLabel")
+        Label.Size = UDim2.new(0, 200, 1, 0)
+        Label.Position = UDim2.new(0, 14, 0, 0) -- padding-left: 14px
+        Label.BackgroundTransparency = 1
+        Label.TextColor3 = Color3.fromRGB(229, 225, 225) -- color: #e5e5e5
+        Label.Text = labelText
+        Label.Font = Enum.Font.SourceSansBold
+        Label.TextSize = 13
+        Label.TextXAlignment = Enum.TextXAlignment.Left
+        Label.Parent = RowFrame
+
+        local Btn = Instance.new("TextButton")
+        Btn.Size = UDim2.new(0, 100, 0, 26) -- min-width: 100px
+        Btn.Position = UDim2.new(1, -114, 0.5, -13)
+        Btn.BackgroundColor3 = Color3.fromRGB(26, 26, 34) -- background-color: #1a1a22
+        Btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        Btn.Text = buttonText
+        Btn.Font = Enum.Font.SourceSansBold
+        Btn.TextSize = 12
+        Btn.Parent = RowFrame
+
+        local BtnStroke = Instance.new("UIStroke")
+        BtnStroke.Thickness = 1
+        BtnStroke.Color = Color3.fromRGB(42, 42, 53) -- border: 1px solid #2a2a35
+        BtnStroke.Parent = Btn
+
+        local BtnCorner = Instance.new("UICorner")
+        BtnCorner.CornerRadius = UDim.new(0, 4) -- border-radius: 4px
+        BtnCorner.Parent = Btn
+
+        Btn.MouseButton1Click:Connect(function() callback(Btn) end)
+    end
+
+    -- Tab Switching Logic Engine
+    MovementTab.MouseButton1Click:Connect(function()
+        MovementTab.BackgroundColor3 = Color3.fromRGB(128, 0, 0) MovementTab.TextColor3 = Color3.fromRGB(255, 255, 255)
+        NetworkTab.BackgroundColor3 = Color3.fromRGB(16, 16, 19) NetworkTab.TextColor3 = Color3.fromRGB(160, 160, 165)
+        MovementPage.Visible = true NetworkPage.Visible = false
+    end)
+    NetworkTab.MouseButton1Click:Connect(function()
+        NetworkTab.BackgroundColor3 = Color3.fromRGB(128, 0, 0) NetworkTab.TextColor3 = Color3.fromRGB(255, 255, 255)
