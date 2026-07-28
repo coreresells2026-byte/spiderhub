@@ -1,5 +1,5 @@
 -- =============================================================================
--- SPIDERHUB CODES ENGINE V4.0 (EXACT HTML TRANSLATION PROFILES)
+-- SPIDERHUB CODES ENGINE V4.0 (EXACT HTML TRANSLATION PROFILES - SOLID LOGIC)
 -- =============================================================================
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
@@ -72,25 +72,10 @@ if PlayerGui then
     LogoLabel.Size = UDim2.new(0, 120, 0, 75) 
     LogoLabel.Position = UDim2.new(0, 20, 0.5, -37) -- padding: 0 20px
     LogoLabel.BackgroundTransparency = 1
+    -- Web-Safe Roblox Cloud rendering avoids executor system directory file-writing blocks completely
+    LogoLabel.Image = "rbxassetid://135899933585094" 
     LogoLabel.ScaleType = Enum.ScaleType.Fit
     LogoLabel.Parent = PanelHeader
-
-    -- =============================================================================
-    -- GITHUB LOGO FILE CACHING HANDSHAKE (No Roblox Asset ID Upload Needed!)
-    -- =============================================================================
-    pcall(function()
-        -- ⚠️ REMEMBER: CHANGE "YourUsername" AND "YourRepoName" TO MATCH YOUR GITHUB LINK EXACTLY!
-        local gitRawUrl = "https://githubusercontent.com"
-        local cachedFileName = "spiderhub_v4_logo.png"
-
-        -- Download and cache the png straight to your local Xeno storage folder seamlessly
-        if not isfile(cachedFileName) then
-            local dataStream = game:HttpGet(gitRawUrl)
-            writefile(cachedFileName, dataStream)
-        end
-        -- Generate the custom local asset file pointer string
-        LogoLabel.Image = getcustomasset(cachedFileName)
-    end)
 
     local TitleText = Instance.new("TextLabel")
     TitleText.Size = UDim2.new(1, -180, 1, 0)
@@ -212,3 +197,18 @@ if PlayerGui then
         BtnStroke.Parent = Btn
 
         local BtnCorner = Instance.new("UICorner")
+        BtnCorner.CornerRadius = UDim.new(0, 4) -- border-radius: 4px
+        BtnCorner.Parent = Btn
+
+        Btn.MouseButton1Click:Connect(function() callback(Btn) end)
+    end
+
+    -- Tab Switching Logic Engine
+    MovementTab.MouseButton1Click:Connect(function()
+        MovementTab.BackgroundColor3 = Color3.fromRGB(128, 0, 0) MovementTab.TextColor3 = Color3.fromRGB(255, 255, 255)
+        NetworkTab.BackgroundColor3 = Color3.fromRGB(16, 16, 19) NetworkTab.TextColor3 = Color3.fromRGB(160, 160, 165)
+        MovementPage.Visible = true NetworkPage.Visible = false
+    end)
+    NetworkTab.MouseButton1Click:Connect(function()
+        NetworkTab.BackgroundColor3 = Color3.fromRGB(128, 0, 0) NetworkTab.TextColor3 = Color3.fromRGB(255, 255, 255)
+        MovementTab.BackgroundColor3 = Color3.fromRGB(16, 16, 19) MovementTab.TextColor3 = Color3.fromRGB(160, 160, 165)
