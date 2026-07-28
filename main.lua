@@ -1,5 +1,5 @@
 -- =============================================================================
--- SPIDERHUB CODES ENGINE V4.0 (EXACT HTML TRANSLATION PROFILES - SOLID LOGIC)
+-- SPIDERHUB CODES ENGINE V4.0 (EXACT HTML TRANSLATION PROFILES - NO WRITING BLOCKS)
 -- =============================================================================
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
@@ -72,7 +72,7 @@ if PlayerGui then
     LogoLabel.Size = UDim2.new(0, 120, 0, 75) 
     LogoLabel.Position = UDim2.new(0, 20, 0.5, -37) -- padding: 0 20px
     LogoLabel.BackgroundTransparency = 1
-    -- Web-Safe Roblox Cloud rendering avoids executor system directory file-writing blocks completely
+    -- Bypasses local folder errors entirely by pointing directly to your uploaded image asset string
     LogoLabel.Image = "rbxassetid://135899933585094" 
     LogoLabel.ScaleType = Enum.ScaleType.Fit
     LogoLabel.Parent = PanelHeader
@@ -211,4 +211,3 @@ if PlayerGui then
     end)
     NetworkTab.MouseButton1Click:Connect(function()
         NetworkTab.BackgroundColor3 = Color3.fromRGB(128, 0, 0) NetworkTab.TextColor3 = Color3.fromRGB(255, 255, 255)
-        MovementTab.BackgroundColor3 = Color3.fromRGB(16, 16, 19) MovementTab.TextColor3 = Color3.fromRGB(160, 160, 165)
